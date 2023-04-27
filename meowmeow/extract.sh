@@ -1,7 +1,7 @@
 #!/bin/sh
 
-sudo rm -r ./extracted
+sudo rm -rf ./extracted
 mkdir extracted
 cd extracted
-cpio -idv < ../rootfs.cpio
+cpio -idv < ../myrootfs.cpio
 cd ../
