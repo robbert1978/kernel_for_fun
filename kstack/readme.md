@@ -116,8 +116,8 @@ Vậy ta phải thay đổi chiến thuật.
     ```
     * Mình mmap địa chỉ 0x13370000 mới size là 2 PAGE, mình truy cập PAGE 2 trước PAGE 1, bây giờ thử attach debugger vào xem điều gì xảy ra.
     * Ở đây ta thấy địa chỉ từ  0x13371000 đến 0x13372000 lại xuất hiện trước dù ta mmap địa chỉ 0x13370000, lý do là vì ta đã truy cập PAGE 2 trước nên PAGE 2 sẽ được ánh xạ và xuất hiện trên vùng nhớ ảo trước.
-    ![](https://hackmd.io/_uploads/SkU3-yOV3.png)
-    ![](https://hackmd.io/_uploads/S1L4f1OEh.png)
+    ![image](https://github.com/robbert1978/kernel_for_fun/assets/31349426/9f1c902a-6475-43f3-b959-78371f6040fc)
+    ![image](https://github.com/robbert1978/kernel_for_fun/assets/31349426/79aa11ed-5c63-492e-a589-01f319fd6ce8)
     * Bây giờ, ở những hàm như `copy_from_user`, khi mà hàm này cố gắng truy cập vào địa chỉ ảo ở user-mode chưa được ánh xạ, sẽ xuất hiện tượng `pagefault` , lúc này kernel sẽ gọi hàm để handle `pagefault` trước rồi sẽ cho hàm `copy_from_user` truy cập sau.
     * Ở Linux có [hàm syscall `userfaultfd`](https://man7.org/linux/man-pages/man2/userfaultfd.2.html) giúp ta handle pagefault ở user-mode.
 
