@@ -17,7 +17,7 @@ echo 0 > /proc/sys/kernel/dmesg_restrict
 
 chown root:root flag
 chmod 400 flag
-insmod /root/kstack.ko.old
+insmod /root/kstack.ko
 chmod 777 /proc/stack
 
 echo -e "\nBoot took $(cut -d' ' -f1 /proc/uptime) seconds\n"
