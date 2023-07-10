@@ -146,7 +146,7 @@ But we still need leak heap address and kernel base address.
 
 The function `matrix_set_info` allows us to set any size for the matrix via `matrix->data = kmalloc(matrix->rows * matrix->cols, GFP_KERNEL);`
 
-So I will take advantage of (`struct tty_struct`)[https://elixir.bootlin.com/linux/v6.0.15/source/include/linux/tty.h#L195] to leak:
+So I will take advantage of [`struct tty_struct`](https://elixir.bootlin.com/linux/v6.0.15/source/include/linux/tty.h#L195) to leak:
 ![image](https://github.com/robbert1978/kernel_for_fun/assets/31349426/5d2a9eb2-30b5-4b6c-9faf-8a47e3570d8e)
 ![image](https://github.com/robbert1978/kernel_for_fun/assets/31349426/e20edd81-de55-4309-b39a-4d752c674890)
 
