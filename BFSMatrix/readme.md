@@ -288,7 +288,7 @@ struct matrix_info info3={
 ```
 I will set size of `matrix2` is `0x100` x `0x100`.
 
-Now allocating new `struct tty_struct`, it will overlap with `matrix2` because the latest freed 0x2e0-size chunk is `matrix2->data`.
+Now allocating new `struct tty_struct`, it will overlap with `matrix2->data` because the latest freed 0x2e0-size chunk is `matrix2->data`.
 
 Overwrite `.ops` of the new `struct tty_struct`, we can control RIP ( I will set `tty_struct->ops` = `matrix3->data` ).
 
