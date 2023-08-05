@@ -5,7 +5,7 @@ qemu-system-x86_64 \
     -kernel bzImage \
     -cpu host,+smap,+smep \
     -initrd initramfs.cpio.gz \
-    -append "console=ttyS0 loglevel=3 oops=panic panic=-1 pti=on nokaslr" \
+    -append "console=ttyS0 loglevel=3 oops=panic panic=-1 pti=on kaslr" \
     -smp 2 \
     -monitor /dev/null \
     -enable-kvm \
