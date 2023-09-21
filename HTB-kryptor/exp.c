@@ -1,3 +1,4 @@
+// gcc -o exploit -fno-stack-protector -masm=intel -static exp.c
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <sys/types.h>
