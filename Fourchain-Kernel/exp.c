@@ -170,7 +170,7 @@ int io_del(uint64_t idx)
 
 /* -------------- End -------------- */
 
-/* ---------- kmalloc-192 stuff --------------*/
+/* ---------- kmalloc-96 stuff --------------*/
 
 /*
 /home/note # cat /sys/kernel/slab/kmalloc-96/objs_per_slab
