@@ -2,7 +2,7 @@
 Because of leaking kernel base is impossible to me , I didn't use cross cache technique with `kmalloc-192` and `cred_jar` but with `kmalloc-96` and `cred_jar`,
 just set uid, gid, suid, ... to `zero` ( don't need to leak many addresses like keyring and namespace struct).
 
-I've learnt a better way to spary `struct cred` :D, better than spaming high number of threads.
+I've learnt a better way to spray `struct cred` :D, better than spaming high number of threads.
 
 ```c
 static int sys_io_uring_setup(size_t entries, struct io_uring_params *p)
