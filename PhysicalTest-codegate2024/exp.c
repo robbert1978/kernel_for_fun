@@ -95,7 +95,7 @@ void getShell()
     {
         panic("NO ROOT");
     }
-    logOK("Rooted!");
+    write(STDERR_FILENO, "Rooted!\n", 8);
 
     *(uint64_t*)(0x1337060) = bak1;
     *(uint64_t*)(0x13380b0) = bak2;
