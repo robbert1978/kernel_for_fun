@@ -1,0 +1,31 @@
+diff --git a/fs/splice.c b/fs/splice.c
+index ed8177f6d620..e6a6b898e6a3 100644
+--- a/fs/splice.c
++++ b/fs/splice.c
+@@ -1892,10 +1892,10 @@ static ssize_t link_pipe(struct pipe_inode_info *ipipe,
+         * could deadlock (one doing tee from A -> B, the other from B -> A).
+         */
+        pipe_double_lock(ipipe, opipe);
+-
+-       i_tail = ipipe->tail;
++       /// Weird, I wonder who did steal my pipe ?
++       i_tail = ipipe->tail + 1 ;
+        i_mask = ipipe->ring_size - 1;
+-       o_head = opipe->head;
++       o_head = opipe->head + 1;
+        o_mask = opipe->ring_size - 1;
+
+        do {
+diff --git a/include/linux/pipe_fs_i.h b/include/linux/pipe_fs_i.h
+index 8ff23bf5a819..117f489a061b 100644
+--- a/include/linux/pipe_fs_i.h
++++ b/include/linux/pipe_fs_i.h
+@@ -215,7 +215,8 @@ static inline void pipe_buf_release(struct pipe_inode_info *pipe,
+ {
+        const struct pipe_buf_operations *ops = buf->ops;
+
+-       buf->ops = NULL;
++       // Optimizing kernel by remove unnecessary code, I mean even I don't clean it, if head/tail index does not point to UAF buffer, then why would I be scared of it :)))
++       // buf->ops = NULL;
+        ops->release(pipe, buf);
+ }
